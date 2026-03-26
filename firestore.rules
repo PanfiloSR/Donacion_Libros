@@ -1,0 +1,98 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    //
+    // Collection: students
+    // Document ID: matrícula
+    // Fields:
+    //   - matrícula: string (required)
+    //   - apellidoMaterno: string (required)
+    //   - apellidoPaterno: string (required)
+    //   - nombreAlumno: string (required)
+    //   - programaEducativo: string (required)
+    //
+    // Collection: books
+    // Document ID: auto-generated
+    // Fields:
+    //   - consecutivo: number (required)
+    //   - programaEducativo: string (required)
+    //   - tituloLibro: string (required)
+    //   - autor: string (required)
+    //   - año: string (required)
+    //   - editorial: string (required)
+    //   - bookingCount: number (required, 0-6)
+    //
+    // ===============================================================
+    
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() &&
+        (request.auth.token.email == "jesanchezrom@gmail.com");
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isValidStudent(data) {
+      return data.matricula is string && data.matricula.size() > 0 &&
+             data.apellidoMaterno is string &&
+             data.apellidoPaterno is string &&
+             data.nombreAlumno is string &&
+             data.programaEducativo is string;
+    }
+
+    function isValidBook(data) {
+      return data.tituloLibro is string && data.tituloLibro.size() > 0 &&
+             data.programaEducativo is string &&
+             data.bookingCount is number && data.bookingCount >= 0 && data.bookingCount <= 6;
+    }
+
+    match /users/{userId} {
+      allow read: if isOwner(userId) || isAdmin();
+      allow create: if isAuthenticated() && isOwner(userId);
+      allow update: if isAdmin();
+    }
+
+    match /students/{matricula} {
+      allow read: if isAuthenticated();
+      allow create, update: if isAdmin() && isValidStudent(request.resource.data);
+      allow delete: if isAdmin();
+    }
+
+    match /books/{bookId} {
+      allow read: if isAuthenticated();
+      allow create: if isAdmin() && isValidBook(request.resource.data);
+      allow update: if isAuthenticated() && 
+                    (isAdmin() || 
+                     (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['bookingCount']) &&
+                      request.resource.data.bookingCount == resource.data.bookingCount + 1 &&
+                      request.resource.data.bookingCount <= 6));
+      allow delete: if isAdmin();
+    }
+
+    match /bookings/{bookingId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated();
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    match /communalDonationRequests/{requestId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated();
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    match /test/connection {
+      allow read: if true;
+    }
+  }
+}

@@ -1,0 +1,80 @@
+{
+  "entities": {
+    "Student": {
+      "title": "Student",
+      "description": "Student enrolled in the system",
+      "type": "object",
+      "properties": {
+        "matricula": { "type": "string", "description": "Student ID number" },
+        "apellidoMaterno": { "type": "string" },
+        "apellidoPaterno": { "type": "string" },
+        "nombreAlumno": { "type": "string" },
+        "programaEducativo": { "type": "string" }
+      },
+      "required": ["matricula", "apellidoMaterno", "apellidoPaterno", "nombreAlumno", "programaEducativo"]
+    },
+    "Book": {
+      "title": "Book",
+      "description": "Book available for donation",
+      "type": "object",
+      "properties": {
+        "consecutivo": { "type": "number" },
+        "programaEducativo": { "type": "string" },
+        "tituloLibro": { "type": "string" },
+        "autor": { "type": "string" },
+        "año": { "type": "string" },
+        "editorial": { "type": "string" },
+        "bookingCount": { "type": "number" }
+      },
+      "required": ["consecutivo", "programaEducativo", "tituloLibro", "autor", "año", "editorial", "bookingCount"]
+    },
+    "Booking": {
+      "title": "Booking",
+      "description": "Record of a book reserved by a student",
+      "type": "object",
+      "properties": {
+        "studentMatricula": { "type": "string" },
+        "studentName": { "type": "string" },
+        "bookId": { "type": "string" },
+        "bookTitle": { "type": "string" },
+        "bookingDate": { "type": "string", "format": "date-time" },
+        "deadlineDate": { "type": "string", "format": "date-time" },
+        "status": { "type": "string", "enum": ["active", "released", "donated"] }
+      },
+      "required": ["studentMatricula", "bookId", "bookingDate", "deadlineDate", "status"]
+    },
+    "CommunalDonationRequest": {
+      "title": "CommunalDonationRequest",
+      "description": "Request for a collaborative donation for a book",
+      "type": "object",
+      "properties": {
+        "bookId": { "type": "string" },
+        "bookTitle": { "type": "string" },
+        "studentMatricula": { "type": "string" },
+        "studentName": { "type": "string" },
+        "requestDate": { "type": "string", "format": "date-time" },
+        "status": { "type": "string", "enum": ["pending", "approved", "rejected"] },
+        "reason": { "type": "string" }
+      },
+      "required": ["bookId", "bookTitle", "studentMatricula", "requestDate", "status"]
+    }
+  },
+  "firestore": {
+    "students": {
+      "schema": "Student",
+      "description": "Collection of students"
+    },
+    "books": {
+      "schema": "Book",
+      "description": "Collection of books available for donation"
+    },
+    "bookings": {
+      "schema": "Booking",
+      "description": "Collection of book reservations"
+    },
+    "communalDonationRequests": {
+      "schema": "CommunalDonationRequest",
+      "description": "Collection of communal donation requests"
+    }
+  }
+}

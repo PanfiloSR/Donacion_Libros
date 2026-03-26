@@ -1,0 +1,58 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=JetBrains+Mono:wght@400;500&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: "Playfair Display", ui-serif, Georgia, serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+  
+  --color-lavender: #E9E4F0;
+  --color-violet-600: #8B5CF6;
+  --color-violet-700: #7C3AED;
+  --color-violet-900: #4C1D95;
+  --color-violet-950: #1A1625;
+}
+
+:root {
+  --bg: #FDFCFE;
+  --ink: #1A1625;
+  --lavender: #E9E4F0;
+  --violet: #8B5CF6;
+  --purple: #6D28D9;
+  --deep-purple: #4C1D95;
+  --accent: #D946EF;
+}
+
+body {
+  background-color: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.purple-gradient {
+  background: linear-gradient(135deg, var(--violet) 0%, var(--purple) 100%);
+}
+
+.glass-card {
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(139, 92, 246, 0.1);
+  transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.btn-primary {
+  @apply bg-violet-600 text-white px-6 py-3 rounded-2xl font-bold hover:bg-violet-700 transition-all shadow-lg shadow-violet-200 active:scale-95;
+}
+
+.btn-secondary {
+  @apply bg-lavender text-violet-700 px-6 py-3 rounded-2xl font-bold hover:bg-violet-100 transition-all active:scale-95;
+}
+
+.input-field {
+  @apply w-full bg-white border border-stone-200 rounded-2xl px-4 py-3 outline-none focus:ring-2 focus:ring-violet-500 transition-all;
+}
+
+.card-hover {
+  @apply hover:shadow-xl hover:-translate-y-1 transition-all duration-300;
+}
