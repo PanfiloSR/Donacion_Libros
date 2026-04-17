@@ -1,5 +1,5 @@
 {
-  "name": "Sistema de Donación de Libros (Arquitectura por Capas)",
-  "description": "Plataforma para la donación y apartado de libros con gestión comunal, arquitectura por capas y diseño moderno en tonos púrpura.",
+  "name": "Donación de Libros UPP",
+  "description": "Sistema de Gestión de Donación de Libros de la Universidad Politécnica de Pachuca.",
   "requestFramePermissions": []
 }

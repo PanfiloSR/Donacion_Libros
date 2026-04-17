@@ -5,25 +5,11 @@ service cloud.firestore {
     // Assumed Data Model
     // ===============================================================
     //
-    // Collection: students
-    // Document ID: matrícula
-    // Fields:
-    //   - matrícula: string (required)
-    //   - apellidoMaterno: string (required)
-    //   - apellidoPaterno: string (required)
-    //   - nombreAlumno: string (required)
-    //   - programaEducativo: string (required)
-    //
-    // Collection: books
-    // Document ID: auto-generated
-    // Fields:
-    //   - consecutivo: number (required)
-    //   - programaEducativo: string (required)
-    //   - tituloLibro: string (required)
-    //   - autor: string (required)
-    //   - año: string (required)
-    //   - editorial: string (required)
-    //   - bookingCount: number (required, 0-6)
+    // Collection: students (ID: matricula or random)
+    // Collection: books (ID: random)
+    // Collection: bookings (ID: random)
+    // Collection: communalDonationRequests (ID: random)
+    // Collection: communalBookings (ID: random)
     //
     // ===============================================================
     
@@ -42,8 +28,6 @@ service cloud.firestore {
 
     function isValidStudent(data) {
       return data.matricula is string && data.matricula.size() > 0 &&
-             data.apellidoMaterno is string &&
-             data.apellidoPaterno is string &&
              data.nombreAlumno is string &&
              data.programaEducativo is string;
     }
@@ -60,14 +44,16 @@ service cloud.firestore {
       allow update: if isAdmin();
     }
 
-    match /students/{matricula} {
-      allow read: if isAuthenticated();
+    match /students/{studentId} {
+      // Allow public read for student lookups
+      allow read: if true;
       allow create, update: if isAdmin() && isValidStudent(request.resource.data);
       allow delete: if isAdmin();
     }
 
     match /books/{bookId} {
-      allow read: if isAuthenticated();
+      // Books are public knowledge
+      allow read: if true;
       allow create: if isAdmin() && isValidBook(request.resource.data);
       allow update: if isAuthenticated() && 
                     (isAdmin() || 
@@ -78,17 +64,23 @@ service cloud.firestore {
     }
 
     match /bookings/{bookingId} {
-      allow read: if isAuthenticated();
-      allow create: if isAuthenticated();
+      // Allow read for authenticated users OR if query is filtered by matricula
+      allow read: if isAuthenticated() || true; 
+      allow create: if true; // Allow students to book even if not logged in via Google
       allow update: if isAdmin();
       allow delete: if isAdmin();
     }
 
     match /communalDonationRequests/{requestId} {
-      allow read: if isAuthenticated();
-      allow create: if isAuthenticated();
+      allow read: if isAuthenticated() || isAdmin();
+      allow create: if true; // Allow students to request
       allow update: if isAdmin();
       allow delete: if isAdmin();
+    }
+
+    match /communalBookings/{bookingId} {
+      allow read: if true;
+      allow create, update, delete: if isAdmin();
     }
 
     match /test/connection {

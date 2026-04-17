@@ -18,6 +18,18 @@ import { Student, Book, Booking, CommunalDonationRequest, CommunalBooking } from
 
 export const firestoreService = {
   // Students
+  async getStudentByMatricula(matricula: string) {
+    const q = query(
+      collection(db, 'students'), 
+      where('matricula', '==', matricula),
+      where('status', '==', 'active'),
+      limit(1)
+    );
+    const snap = await getDocs(q);
+    if (snap.empty) return null;
+    return { id: snap.docs[0].id, ...snap.docs[0].data() } as Student;
+  },
+
   async getStudents() {
     const q = query(collection(db, 'students'), where('status', '==', 'active'));
     const snap = await getDocs(q);
@@ -107,6 +119,8 @@ export const firestoreService = {
     const q = query(collection(db, 'books'), where('status', '==', 'active'));
     return onSnapshot(q, (snap) => {
       callback(snap.docs.map(doc => ({ id: doc.id, ...doc.data() } as Book)));
+    }, (error) => {
+      console.error("Error in books snapshot:", error);
     });
   },
 
@@ -114,6 +128,21 @@ export const firestoreService = {
     const q = query(collection(db, 'bookings'), where('status', '==', 'active'));
     return onSnapshot(q, (snap) => {
       callback(snap.docs.map(doc => ({ id: doc.id, ...doc.data() } as Booking)));
+    }, (error) => {
+      console.error("Error in bookings snapshot:", error);
+    });
+  },
+
+  subscribeToBookingsByMatricula(matricula: string, callback: (bookings: Booking[]) => void) {
+    const q = query(
+      collection(db, 'bookings'), 
+      where('studentMatricula', '==', matricula),
+      where('status', '==', 'active')
+    );
+    return onSnapshot(q, (snap) => {
+      callback(snap.docs.map(doc => ({ id: doc.id, ...doc.data() } as Booking)));
+    }, (error) => {
+      console.error("Error in specific bookings snapshot:", error);
     });
   },
 
@@ -121,6 +150,8 @@ export const firestoreService = {
     const q = query(collection(db, 'students'), where('status', '==', 'active'));
     return onSnapshot(q, (snap) => {
       callback(snap.docs.map(doc => ({ id: doc.id, ...doc.data() } as Student)));
+    }, (error) => {
+      console.error("Error in students snapshot:", error);
     });
   },
 
@@ -128,6 +159,8 @@ export const firestoreService = {
     const q = query(collection(db, 'communalDonationRequests'), where('status', '!=', 'archived'));
     return onSnapshot(q, (snap) => {
       callback(snap.docs.map(doc => ({ id: doc.id, ...doc.data() } as CommunalDonationRequest)));
+    }, (error) => {
+      console.error("Error in communal requests snapshot:", error);
     });
   },
 
@@ -156,6 +189,8 @@ export const firestoreService = {
     const q = query(collection(db, 'communalBookings'), where('status', '==', 'active'));
     return onSnapshot(q, (snap) => {
       callback(snap.docs.map(doc => ({ id: doc.id, ...doc.data() } as CommunalBooking)));
+    }, (error) => {
+      console.error("Error in communal bookings snapshot:", error);
     });
   },
 
@@ -171,5 +206,26 @@ export const firestoreService = {
       });
     });
     await batch.commit();
+  },
+
+  async getArchivedData(collectionName: string, periodoId: string) {
+    const q = query(
+      collection(db, collectionName), 
+      where('status', '==', 'archived'),
+      where('periodoId', '==', periodoId)
+    );
+    const snap = await getDocs(q);
+    return snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  },
+
+  async getAllArchivedPeriods(collectionName: string) {
+    const q = query(collection(db, collectionName), where('status', '==', 'archived'));
+    const snap = await getDocs(q);
+    const periods = new Set<string>();
+    snap.docs.forEach(doc => {
+      const data = doc.data();
+      if (data.periodoId) periods.add(data.periodoId);
+    });
+    return Array.from(periods).sort();
   }
 };

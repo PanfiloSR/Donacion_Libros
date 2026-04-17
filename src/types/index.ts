@@ -68,6 +68,7 @@ export interface AdminStats {
   books: number;
   bookings: number;
   donations: number;
+  requests: number;
 }
 
 export interface UserProfile {
