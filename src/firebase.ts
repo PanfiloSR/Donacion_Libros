@@ -1,14 +1,29 @@
 import { initializeApp } from 'firebase/app';
 import { getAuth, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
-import { getFirestore, doc, getDocFromServer } from 'firebase/firestore';
-import firebaseConfig from '../firebase-applet-config.json';
+import {
+  getFirestore,
+  doc,
+  getDocFromServer,
+  connectFirestoreEmulator,
+} from "firebase/firestore"; 
+import { getFunctions, connectFunctionsEmulator } from "firebase/functions"; 
+import firebaseConfig from "../firebase-applet-config.json";
 
 const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const db = getFirestore(app, firebaseConfig.firestoreDatabaseId);
+export const functions = getFunctions(app);
 export const googleProvider = new GoogleAuthProvider();
 
 export const signInWithGoogle = () => signInWithPopup(auth, googleProvider);
+
+if (window.location.hostname === "localhost") {
+  connectFirestoreEmulator(db, "127.0.0.1", 8081);
+  connectFunctionsEmulator(functions, "127.0.0.1", 5001);
+  console.log(
+    "🚀 Conectado a los emuladores locales (Firestore: 8081, Functions: 5001)",
+  );
+}
 
 // Connection test
 async function testConnection() {

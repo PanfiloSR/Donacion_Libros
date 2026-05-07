@@ -55,19 +55,25 @@ service cloud.firestore {
       // Books are public knowledge
       allow read: if true;
       allow create: if isAdmin() && isValidBook(request.resource.data);
-      allow update: if isAuthenticated() && 
-                    (isAdmin() || 
-                     (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['bookingCount']) &&
-                      request.resource.data.bookingCount == resource.data.bookingCount + 1 &&
-                      request.resource.data.bookingCount <= 6));
+      allow update: if isAdmin() || (
+        // Allow students to update bookingCount within limits (0-6)
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['bookingCount']) &&
+        request.resource.data.bookingCount is number &&
+        request.resource.data.bookingCount >= 0 &&
+        request.resource.data.bookingCount <= 6
+      );
       allow delete: if isAdmin();
     }
 
     match /bookings/{bookingId} {
-      // Allow read for authenticated users OR if query is filtered by matricula
-      allow read: if isAuthenticated() || true; 
-      allow create: if true; // Allow students to book even if not logged in via Google
-      allow update: if isAdmin();
+      // Allow public read for student lookups and verification
+      allow read: if true; 
+      allow create: if true; 
+      allow update: if isAdmin() || (
+        // Allow students to cancel/release their own booking if they know the ID
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status']) &&
+        request.resource.data.status == 'released'
+      );
       allow delete: if isAdmin();
     }
 
